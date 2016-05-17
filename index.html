@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Od zera do bohatera - wyboista ścieżka mocy - case study o2.pl</title>
+  <meta name="author" content="Radosław Rosłaniec">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="css/reveal.css">
+  <link rel="stylesheet" href="css/theme/white.css" id="theme">
+  <!-- Code syntax highlighting -->
+  <link rel="stylesheet" href="lib/css/zenburn.css">
+  <!-- Printing and PDF exports -->
+
+  <script>
+  var link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.type = 'text/css';
+  link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+  document.getElementsByTagName('head')[0].appendChild(link);
+  </script>
+  <!--[if lt IE 9]>
+        <script src="lib/js/html5shiv.js"></script>
+        <![endif]-->
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section data-background="imgs/bg-big.png">
+        <h2>Od zera do bohatera</h2>
+        <p >
+          <div style="height: 200px;"></div>
+        </p>
+        <p>
+          wyboista ścieżka mocy - case study o2.pl
+        </p>
+        <p>
+          <small>Radosław Rosłaniec</a></small>
+        </p>
+      </section>
+      <section data-background="imgs/bg-small.png">
+        <section>
+          <h2>Stack</h2>
+          <p>
+            <p class="fragment">React</p>
+            <p class="fragment">alt.js</p>
+            <p class="fragment">ES2015 + Babel + Webpack</p>
+            <p class="fragment"> = </p>
+            <p class="fragment"><img class="plain" src="imgs/o2.png"></p>
+          </p>
+        </section>
+        <section>
+          <p><img class="plain" src="imgs/o2-site.png"></p>
+        </section>
+        <section>
+          <h1>Zespół</h1>
+        </section>
+      </section>
+      <section data-background="imgs/bg-small.png">
+        <section>
+          <h1>React</h1>
+        </section>
+        <section>
+          <p style="position: absolute;top:0px;" class="fragment current-visible">
+            <img style="float: left" class="plain" src="imgs/grid-container.png" />
+            <span style="position: absolute;top: 20%">Grid Container</span>
+          </p>
+          <p style="position: absolute;top:0px;" class="fragment current-visible">
+            <img style="float: left" class="plain" src="imgs/tabs.png" />
+            <span style="position: absolute;top: 20%">Tabs</span>
+          </p>
+          <p style="position: absolute;top:0px;" class="fragment current-visible">
+            <img style="float: left" class="plain" src="imgs/tab.png" />
+            <span style="position: absolute;top: 20%">Tab</span>
+          </p>
+          <p style="position: absolute;top:0px;" class="fragment current-visible">
+            <img style="float: left" class="plain" src="imgs/grid.png" />
+            <span style="position: absolute;top: 20%">Boxes Container</span>
+          </p>
+          <p style="position: absolute;top:0px;" class="fragment current-visible">
+            <img style="float: left" class="plain" src="imgs/box.png" />
+            <span style="position: absolute;top: 20%">Box</span>
+          </p>
+          <p style="position: absolute;top:0px;" class="fragment current-visible">
+            <img style="float: left" class="plain" src="imgs/title.png" />
+            <span style="position: absolute;top: 20%">Title</span>
+          </p>
+        </section>
+        <section>
+          <p>componentWillMount i (jego) księga tajemnic</p>
+          <pre class="fragment current-visible"><code class="javascript" data-trim >
+//stuff
+
+componentWillMount() {
+  window.addEventListener('focus', this.handleWindowFocus)
+}
+
+//stuff
+          </code></pre>
+          <pre class="fragment current-visible"><code class="javascript" data-trim >
+//SSR friendly stuff
+
+componentDidMount() {
+  window.addEventListener('focus', this.handleWindowFocus)
+}
+
+//SSR friendly stuff
+          </code></pre>
+        </section>
+        <section>
+          <p>Okej. Zamontowałeś? Odmontuj!</p>
+          <pre class="fragment current-visible"><code class="javascript" data-trim >
+//stuff
+
+componentDidMount() {
+  window.addEventListener('focus', this.handleWindowFocus)
+  this.intervalId = setInterval(() => {
+    console.log('tick')
+  }, 1000)
+}
+
+componentWillUnmount() {
+  window.removeEventListener('focus', this.handleWindowFocus)
+  clearInterval(this.intervalId)
+}
+
+//stuff
+          </code></pre>
+        </section>
+        <section class="full">
+          <p>Binding context</p>
+          <pre class="fragment current-visible" style="position: absolute;"><code class="javascript" data-trim data-noescape>
+class App extends React.Component {
+  handleUpdate(event) {
+    console.log('update handler')
+  }
+
+  render() {
+    return (
+      &lt;input onChange={this.handleUpdate.bind(this)} />
+    )
+  }
+}
+          </code></pre>
+          <pre class="fragment current-visible" style="position: absolute;"><code class="javascript" data-trim data-noescape>
+class App extends React.Component {
+  constructor(props) {
+    super(props)
+    this.handleUpdate = this.handleUpdate.bind(this)
+  }
+
+  handleUpdate(event) {
+    console.log('update handler')
+  }
+
+  render() {
+    return (
+      &lt;input onChange={this.handleUpdate} />
+    )
+  }
+}
+          </code></pre>
+        </section>
+        <section class="full">
+          <p>Domyślne wartości</p>
+          <pre class="fragment current-visible" style="position: absolute;"><code class="javascript" data-trim data-noescape>
+class Title extends React.Component {
+
+  render() {
+    return (
+      &lt;div>
+        {this.props.title || ''}
+      &lt;/div>
+    )
+  }
+}
+Title.displayName = 'Title'
+export default Title
+          </code></pre>
+          <pre class="fragment current-visible" style="position: absolute;"><code class="javascript" data-trim data-noescape>
+const emptyTitle = ''
+class Title extends React.Component {
+
+  render() {
+    return (
+      &lt;div>
+        {this.props.title || emptyTitle}
+      &lt;/div>
+    )
+  }
+}
+Title.displayName = 'Title'
+export default Title
+          </code></pre>
+          <pre class="fragment current-visible" style="position: absolute;"><code class="javascript" data-trim data-noescape>
+class Title extends React.Component {
+
+  render() {
+    return (
+      &lt;div>
+        {this.props.title}
+      &lt;/div>
+    )
+  }
+}
+Title.displayName = 'Title'
+Title.defaultProps = {
+  title: ''
+}
+export default Title
+          </code></pre>
+        </section>
+        <section class="full">
+          <p>propTypes</p>
+          <pre class="fragment current-visible" style="position: absolute;"><code class="javascript" data-trim data-noescape>
+class Article extends React.Component {
+
+  render() {
+    const video = this.props.video
+    return (
+      &lt;div>
+        {this.props.title}
+        &lt;div>
+          {video ? &lt;div>
+            &lt;span>{video.title}&lt;/span>
+            &lt;video>
+              &lt;source src={video.url} type="video/mp4">
+            &lt;/video>
+          &lt;/div> : null}
+        &lt;/div>
+      &lt;/div>
+    )
+  }
+}
+Article.displayName = 'Article'
+Article.defaultProps = {
+  title: ''
+}
+Article.propTypes = {
+  title: React.PropTypes.string,
+  video: React.PropTypes.shape({
+    url: React.PropTypes.string,
+    title: React.PropTypes.string
+  })
+}
+export default Article
+          </code></pre>
+        </section>
+        <section>
+          <p>eslint airbnb</p>
+          <p class="fragment">
+            <img src="imgs/soldier.gif" />
+          </p>
+        </section>
+        <section>
+          <p class="fragment current-visible" style="position: absolute; left: 45%">mixins</p>
+          <p class="fragment current-visible" style="position: absolute; left: 45%"><del>mixins</del></p>
+          <p class="fragment" style="position: absolute; left: 30%">komponent wyższego poziomu</p>
+        </section>
+      </section>
+      <section data-background="imgs/bg-small.png">
+        <section>
+          <h1>alt.js</h1>
+          <p><img class="plain" src="imgs/alt.png"></p>
+        </section>
+        <section>
+          <pre><code>
+  your_project
+  |--actions/
+  |  |--MyActions.js
+  |--sources/
+  |  |--MyStoreSource.js
+  |--stores/
+  |  |--MyStore.js
+  |--components/
+  |  |--MyComponent.jsx
+  |--alt.js
+  |--app.js
+          </code></pre>
+        </section>
+        <section class="full">
+          <p>Show me the code!</p>
+          <pre class="fragment current-visible" style="position: absolute;"><code class="javascript" data-trim data-noescape>
+//actions/my-store.js
+import { alt } from '../alt.js'
+
+class Actions {
+  constructor() {
+    this.generateActions('fetchItems', 'setItems', 'fetchFailed')
+  }
+}
+
+export let MyStoreActions = alt.createActions(Actions)
+          </code></pre>
+          <pre class="fragment current-visible" style="position: absolute;"><code class="javascript" data-trim data-noescape>
+//stores/my-store.js
+import { alt } from '../alt.js'
+
+import { MyStoreActions } from '../actions/my-store.js'
+import { MyStoreSource } from '../sources/my-store.js'
+
+class Store {
+  constructor() {
+    this.bindActions(MyStoreActions)
+    this.registerAsync(MyStoreSource)
+    this.state = {
+      items: []
+    }
+  }
+  onFetchItems() {
+    this.getInstance().fetchItems()
+  }
+  onSetItems(items){
+    this.setState({ items })
+  }
+  onFetchFailed() {
+    //handle error
+  }
+}
+export const MyStore = alt.createStore(Store, 'MyStore')
+          </code></pre>
+          <pre class="fragment current-visible" style="position: absolute;"><code class="javascript" data-trim data-noescape>
+//sources/my-store.js
+import { MyStoreActions } from '../actions/my-store.js'
+export const MyStoreSource = {
+  fetchItems: {
+    remote() {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve([1,2,3]);
+        }, 1000)
+      })
+    },
+    success:  MyStoreActions.setItems,
+    error: MyStoreActions.fetchFailed
+  }
+}
+          </code></pre>
+          <pre class="fragment current-visible" style="position: absolute;"><code class="javascript" data-trim data-noescape>
+//components/my-component.js
+import React from 'react'
+import AltContainer from 'alt-container'
+
+import { MyStore } from '../stores/my-store.js'
+import { MyStoreActions } from '../actions/my-store.js'
+
+import { Items } from './items.js'
+
+class ItemsContainer extends React.Component {
+
+  componentWillMount() {
+    MyStoreActions.fetchItems()
+  }
+
+  render() {
+    return (
+      &lt;AltContainer store={MyStore} actions={MyStoreActions}>
+        &lt;Items />
+      &lt;/AltContainer>
+    )
+  }
+}
+ItemsContainer.displayName = 'ItemsContainer'
+
+export default ItemsContainer
+          </code></pre>
+          <pre class="fragment current-visible" style="position: absolute;"><code class="javascript" data-trim data-noescape>
+//components/items.js
+import React from 'react'
+
+class Items extends React.Component {
+
+  render() {
+    return (
+      &lt;div>
+        {this.props.MyStore.items.map(item => &lt;div>{item}&lt;/div>)}
+      &lt;/div>
+    )
+  }
+}
+Items.displayName = 'Items'
+
+export default Items
+          </code></pre>
+        </section>
+        <section>
+          <p>Silne strony alt.js</p>
+          <p class="fragment"><small>- prostota</small></p>
+          <p class="fragment"><small>- zarządzanie stanami</small></p>
+          <p class="fragment"><small>- AltContainer</small></p>
+        </section>
+      </section>
+      <section class="full" data-background="imgs/bg-small.png">
+        <h1 style="position:absolute; top:35%;left:20%;">PODSUMOWANIE</h1>
+        <span class="fragment" style="position:absolute; top:15%;left:70%;transform: rotate(7deg);"><del>componentWillMount & window</del></span>
+        <span class="fragment" style="position:absolute; top:60%;left:70%;transform: rotate(15deg);">addEventListener <br /><hr style="margin:1px;" /> removeEventListener</span>
+        <span class="fragment" style="position:absolute; top:10%;left:30%;transform: rotate(-7deg);">binding context</span>
+        <span class="fragment" style="position:absolute; top:60%;left:10%;transform: rotate(7deg);">defaultProps</span>
+        <span class="fragment" style="position:absolute; top:60%;left:30%;transform: rotate(30deg);">propTypes</span>
+        <span class="fragment" style="position:absolute; top:20%;left:50%;transform: rotate(-20deg);"><del>mixins</del></span>
+        <span class="fragment" style="position:absolute; top:50%;left:35%;">alt === easy flux</span>
+      </section>
+      <section data-background="imgs/bg-small.png">
+        <h1>dzięki!</h1>
+      </section>
+    </div>
+  </div>
+  <script src="lib/js/head.min.js"></script>
+  <script src="js/reveal.js"></script>
+  <script>
+  Reveal.initialize({
+    controls: true,
+    progress: true,
+    history: true,
+    center: true,
+
+    transition: 'slide',
+
+    dependencies: [{
+      src: 'lib/js/classList.js',
+      condition: function() {
+        return !document.body.classList;
+      }
+    }, {
+      src: 'plugin/markdown/marked.js',
+      condition: function() {
+        return !!document.querySelector('[data-markdown]');
+      }
+    }, {
+      src: 'plugin/markdown/markdown.js',
+      condition: function() {
+        return !!document.querySelector('[data-markdown]');
+      }
+    }, {
+      src: 'plugin/highlight/highlight.js',
+      async: true,
+      callback: function() {
+        hljs.initHighlightingOnLoad();
+      }
+    }, {
+      src: 'plugin/zoom-js/zoom.js',
+      async: true
+    }, {
+      src: 'socket.io/socket.io.js',
+      async: true
+    }]
+  });
+  </script>
+  <style type="text/css">
+  .scrolledContainer {
+    height: 500px;
+    overflow: scroll;
+    overflow-x: hidden;
+  }
+
+  .scrolledContainer h2 {
+    padding-top: 20px;
+  }
+  .full {
+    height: 100%;
+    top:0px !important;
+    margin-top: 0px;
+  }
+  </style>
+</body>
+
+</html>
